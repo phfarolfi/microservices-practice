@@ -2,6 +2,7 @@ import { z } from "zod"
 import { fastify } from "fastify"
 import { randomUUID } from "node:crypto"
 import { fastifyCors } from "@fastify/cors"
+import '@opentelemetry/auto-instrumentations-node/register'
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from "fastify-type-provider-zod"
 
 import "../broker/subscriber.ts"
