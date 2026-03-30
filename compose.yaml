@@ -1,0 +1,41 @@
+services:
+  # This is needed only for local development
+  # broker:
+  #   image: rabbitmq:3-management
+  #   container_name: rabbitmq
+  #   ports:
+  #     - "5672:5672"      # RabbitMQ broker
+  #     - "15672:15672"    # Management UI
+  #   volumes:
+  #     - rabbitmq_data:/var/lib/rabbitmq
+  # jaeger:
+  #   image: jaegertracing/all-in-one:1.57
+  #   container_name: jaeger
+  #   ports:
+  #     - "16686:16686"    # UI
+  #     - "6831:6831/udp"  # Traces UDP
+  #     - "14268:14268"    # Traces HTTP
+  #     - "4317:4317"      # OpenTelemetry gRPC
+  #     - "4318:4318"      # OpenTelemetry HTTP
+
+  # To set kong up in AWS, we need to use a custom image to apply the ORDERS_SERVICE_URL environment variable
+  api-gateway:
+    build:
+      context: './docker/kong'
+    container_name: kong
+    environment:
+      KONG_DATABASE: 'off'  # Use DB-less mode
+      KONG_ADMIN_LISTEN: '0.0.0.0:8001'
+      KONG_ADMIN_GUI_URL: http://localhost:8002
+      ORDERS_SERVICE_URL: 'http://host.docker.internal:3333' # URL for the orders service
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # For local development. Hack to make kong access the localhost outside the container
+    ports:
+      - "8000:8000"      # Proxy (API)
+      - "8001:8001"      # Admin API
+      - "8002:8002"      # Admin GUI
+      - "8443:8443"      # Proxy (HTTPS)
+      - "8444:8444"      # Admin API (HTTPS)
+
+volumes:
+  rabbitmq_data:
